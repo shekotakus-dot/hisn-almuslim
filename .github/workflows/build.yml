@@ -1,0 +1,50 @@
+name: Build Android App Bundle
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Dependencies
+        run: |
+          npm install
+          npm install @capacitor/android @capacitor/cli @capacitor/core
+
+      - name: Build Web App
+        run: npm run build --if-present
+
+      - name: Add Android Platform & Sync
+        run: |
+          npx cap add android || true
+          npx cap sync android
+
+      - name: Build Android App Bundle (AAB)
+        working-directory: android
+        run: ./gradlew bundleRelease
+
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hisn-almuslim-aab
+          path: android/app/build/outputs/bundle/release/*.aab
