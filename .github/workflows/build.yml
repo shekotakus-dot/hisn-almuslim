@@ -26,6 +26,7 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install
+          npm install typescript @types/node -D
           npm install @capacitor/android @capacitor/cli @capacitor/core
 
       - name: Build Web App
